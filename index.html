@@ -12,7 +12,7 @@
 
         //主页分类
         function getList(){
-            $.get("http://120.55.28.235/public/getRecipeHomeData.shtml?machine=e2a67b47721c6c87c9402146dec359cb&device=vmos&terminal=2&app=cn.ecook.jiachangcai&appid=cn.ecook.jiachangcai&version=5.5.1&systemversion=25&machineId=e2a67b47721c6c87c9402146dec359cb",
+            $.get("http://120.55.28.235/public/getRecipeHomeData.shtml",
                     function(data){	WriteStList(data);	},
                     "JSON");
         }
