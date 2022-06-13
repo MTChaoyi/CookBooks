@@ -12,7 +12,7 @@
 
         //主页分类
         function getList(){
-            $.get("http://120.55.28.235/public/getRecipeHomeData.shtml",
+            $.get("json/type.json",
                     function(data){	WriteStList(data);	},
                     "JSON");
         }
