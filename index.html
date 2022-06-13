@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="js/jquery-3.6.0.min.js"></script>
+    <title>菜谱合集</title>
+    <script type="text/javascript">
+        $(document).ready( function(){	getList();	}	);
+
+        //主页分类
+        function getList(){
+            $.get("http://120.55.28.235/public/getRecipeHomeData.shtml?machine=e2a67b47721c6c87c9402146dec359cb&device=vmos&terminal=2&app=cn.ecook.jiachangcai&appid=cn.ecook.jiachangcai&version=5.5.1&systemversion=25&machineId=e2a67b47721c6c87c9402146dec359cb",
+                    function(data){	WriteStList(data);	},
+                    "JSON");
+        }
+
+        function WriteStList(data){
+            var da = eval("(" + JSON.stringify(data) + ")")
+            var ht = ""
+            for(var i=0; i<da["list"].length;i++){
+                ht += "<div class='fenlei-box'>";
+                ht += "<div class='fenlei-name'>" + JSON.stringify(da["list"][i]["name"]).slice(1,-1) + "</div>";
+                for(var j=0; j<da["list"][i]["list"].length;j++){
+                    ht += "<div class='fenlei' onclick='gettype(" + JSON.stringify(da["list"][i]["list"][j]["id"]).slice(1,-1) + ",0)'>" + JSON.stringify(da["list"][i]["list"][j]["name"]).slice(1,-1) + "</div>"
+                }
+                ht += "</div>";
+            }
+            document.getElementById('text').innerHTML = ht
+        }
+
+        //某分类详情
+        function gettype(id,page){
+            page = parseInt(page)
+            $.get("http://120.55.28.235/public/getContentsBySubClassid.shtml?id="+id+"&page="+page,function(data){ WriteTpList(data,id,page); },"JSON");
+        }
+
+        function WriteTpList(data,id,page){
+            var ps = parseInt(page) - 1
+            var px = parseInt(page) + 1
+            var da = eval("(" + JSON.stringify(data) + ")")
+            var ht = "<div style='cursor: pointer;color:#f00' onclick='fanhuiindex()'>返回</div>"
+            if(page!=0){
+                ht += "<div style='cursor: pointer;color:#f00' onclick='gettype(" + id + "," + ps + ")'>上一页</div>"
+            }
+            for(var i=0; i<da["list"].length;i++){
+                ht += "<div class='image-box' onclick='getbook(" + JSON.stringify(da["list"][i]["id"]).slice(1,-1) + ")'>";
+                ht += "<div class='image'><img src='http://pic.ecook.cn/web/" + JSON.stringify(da["list"][i]["imageid"]).slice(1,-1) + ".jpg!m7'></div>";
+                ht += JSON.stringify(da["list"][i]["name"]).slice(1,-1) + "</div>";
+            }
+            ht += "<div style='cursor: pointer;color:#f00' onclick='gettype(" + id + "," + px + ")'>下一页</div>"
+            document.getElementById('typebyid').innerHTML = ht
+            document.getElementById('text').style.display = "none"
+            document.getElementById('typebyid').style.display = ""
+        }
+
+        function fanhuiindex(){
+            document.getElementById('text').style.display = ""
+            document.getElementById('typebyid').style.display = "none"
+        }
+
+        //食谱详情
+        function getbook(id){
+            $.get("http://120.55.28.235/public/getRecipeListByIds.shtml?ids="+id,function(data){ WriteBoList(data); },"JSON");
+        }
+
+        function WriteBoList(data){
+            var da = eval("(" + JSON.stringify(data) + ")")
+            var ht = "<div style='cursor: pointer;color:#f00' onclick='fanhuitype()'>返回</div>"
+
+            ht += "<div>" + JSON.stringify(da["list"][0]["name"]).slice(1,-1) + "</div>"
+            ht += "<div>" + JSON.stringify(da["list"][0]["description"]).slice(1,-1) + "</div>"
+
+            ht += "<div><div>需要食材</div><div><table>"
+            for(var i=0; i<da["list"][0]["materialList"].length;i++){
+                ht += "<tr><td>" + JSON.stringify(da["list"][0]["materialList"][i]["name"]).slice(1,-1) + "</td><td>"
+                    + JSON.stringify(da["list"][0]["materialList"][i]["dosage"]).slice(1,-1) + "</td></tr>"
+            }
+            ht += "</table></div></div>"
+
+            ht += "<div><div>烹饪步骤</div>"
+            for(var i=1; i<=da["list"][0]["stepList"].length;i++){
+                ht += "<div class='image-box' style='float: none;'><div>步骤" + i + "</div><div class='image'><img src='http://pic.ecook.cn/web/"
+                    + JSON.stringify(da["list"][0]["stepList"][i-1]["imageid"]).slice(1,-1) + ".jpg!m7'></div>"
+                    + JSON.stringify(da["list"][0]["stepList"][i-1]["details"]).slice(1,-1) + "</div>"
+            }
+
+            document.getElementById('bookbyid').innerHTML = ht
+            document.getElementById('bookbyid').style.display = ""
+            document.getElementById('typebyid').style.display = "none"
+        }
+
+        function fanhuitype(){
+            document.getElementById('typebyid').style.display = ""
+            document.getElementById('bookbyid').style.display = "none"
+        }
+    </script>
+
+    <style>
+        .fenlei-box{
+            float: left;
+            margin: 20px;
+            text-align: center;
+        }
+        .fenlei-name{
+            color: #f00;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .fenlei{
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        img{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        .image {
+            height: 200px;
+            overflow: hidden;
+            width: 350px;
+        }
+        .image-box{
+            cursor: pointer;
+            float: left;
+            margin: 10px;
+            width: 350px;
+        }
+    </style>
+</head>
+
+<body>
+<div id="text"></div>
+<div id="typebyid" style="display:none"></div>
+<div id="bookbyid" style="display:none"></div>
+</body>
+
+</html>
